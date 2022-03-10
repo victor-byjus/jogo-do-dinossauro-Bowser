@@ -1,12 +1,13 @@
 var bowser, bowserCorrendo;
 var solo, soloImagem;
 var soloInvisivel;
+var nuvem, nuvemImagem;
 
 function preload(){
 
    bowserCorrendo = loadAnimation("trex1.png","trex3.png","trex4.png");
    soloImagem = loadImage("ground2.png");
-
+   nuvemImagem = loadImage("cloud.png");
 }
 
 function setup(){
@@ -30,7 +31,7 @@ function setup(){
 
 function draw(){
 
-   background("lightgrey");
+   background("darkgrey");
 
    if(keyDown("space") && bowser.y >= 150){
       bowser.velocityY = -12;
@@ -44,6 +45,20 @@ function draw(){
 
    bowser.collide(soloInvisivel);
 
+   criarNuvens();
+
    drawSprites();
 
+}
+
+function criarNuvens(){
+   if(frameCount % 60 === 0){
+   nuvem = createSprite(600,100,40,10);
+   nuvem.addImage(nuvemImagem);
+   nuvem.scale = random(0.1, 1);
+   nuvem.y = Math.round(random(10,120));
+   nuvem.velocityX = -3;
+   nuvem.depth = bowser.depth;
+   bowser.depth = bowser.depth + 1;
+}
 }
