@@ -12,6 +12,7 @@ var GAMEOVER = 0;
 var estadodojogo = PLAY;
 var acabouSprite, acabouImagem;
 var restartSprite, restartImagem;
+var somDoPulo, somDaMorte, somDoCheckPoint;
 
 //Aqui estamos carregando os arquivos(imagem, animação e sons)
 function preload(){
@@ -28,6 +29,9 @@ function preload(){
    bowserBateu = loadAnimation("trex_collided.png");
    acabouImagem = loadImage("gameOver.png");
    restartImagem = loadImage("restart.png");
+   somDoPulo = loadSound("jump.mp3");
+   somDaMorte = loadSound("die.mp3");
+   somDoCheckPoint = loadSound("checkPoint.mp3");
 }
 
 //Essa é a função de configuração
@@ -45,9 +49,12 @@ function setup(){
    bowser.scale = 0.5;
    bowser.debug = false;
    bowser.setCollider("circle", 0, 0, 40);
+
    //cria e configura o solo invisível
    soloInvisivel = createSprite(200,190,400,10);
    soloInvisivel.visible = false;
+
+   
    //cria as bordas da tela
    borda = createEdgeSprites();
    //pontuação inicia zerada
@@ -55,6 +62,7 @@ function setup(){
    //cria os grupos de nuvens e cactos
    grupodenuvens = new Group();
    grupodecactos = new Group();
+   console.log("até aqui o código funcionou");
    //Cria e configura o texto de game over
    acabouSprite = createSprite(300,100);
    acabouSprite.addImage(acabouImagem);
@@ -63,26 +71,33 @@ function setup(){
    restartSprite = createSprite(300,140);
    restartSprite.addImage(restartImagem);
    restartSprite.scale = 0.5;
+ 
 
 }
 
 //Função de desenho
 function draw(){
+   
    //pinta o fundo de cinza escuro
    background("darkgrey");
    //Define as configurações para o estado PLAY
    if(estadodojogo === PLAY){
+      //Toca o som a cada 100 pontos
+      if(pontos > 0 && pontos % 100 === 0){
+        somDoCheckPoint.play();
+      }
       //Game over e restart ficam invisíveis
       acabouSprite.visible = false;
       restartSprite.visible = false;
       //Movimenta o solo infinito
-      solo.velocityX = -2;
+      solo.velocityX = -(4+pontos/100);
       if(solo.x < 0){
          solo.x = solo.width/2;
       }
       //Faz o bowser pular
       if(keyDown("space") && bowser.y >= 150){
          bowser.velocityY = -12;
+         somDoPulo.play();
       }
       //Sistema de gravidade
       bowser.velocityY = bowser.velocityY + 1;
@@ -98,6 +113,8 @@ function draw(){
          estadodojogo = GAMEOVER;
          //Muda a imagem do bowser para assustado
          bowser.changeAnimation("bateu");
+         //Toca o som de quando o bowser morre
+         somDaMorte.play();
       }
    }
    //Define as configurações para o estado GAMEOVER
@@ -109,7 +126,7 @@ function draw(){
       solo.velocityX = 0;
       //Faz o bowser ficar parado no ar
       bowser.velocityY = 0;
-      //Faz os grupos de cactos e nuvens ficarem parado
+      //Faz os grupos de cactos e nuvens ficarem parados
       grupodenuvens.setVelocityXEach(0);
       grupodecactos.setVelocityXEach(0);
       //Faz os grupos de cactos e nuvens não desaparecerem
@@ -118,7 +135,7 @@ function draw(){
    }
    //Faz o bowser não sair da tela
    bowser.collide(soloInvisivel);
-   //Desenha Todos os sprites
+   //Desenha todos os sprites
    drawSprites();
    //Configura e coloca o texto dos pontos na tela
    fill("black");
@@ -144,7 +161,7 @@ function criarNuvens(){
 function criarCactos(){
   if(frameCount % 60 === 0){
      var bowsermau = createSprite(600,165,10,40);
-     bowsermau.velocityX = -6;
+     bowsermau.velocityX = -(6+pontos/100);
      var numero = Math.round(random(1,6));
      switch(numero){
         case 1: bowsermau.addImage(bowser1);
