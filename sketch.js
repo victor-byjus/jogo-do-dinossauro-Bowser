@@ -84,7 +84,7 @@ function draw(){
    if(estadodojogo === PLAY){
       //Toca o som a cada 100 pontos
       if(pontos > 0 && pontos % 100 === 0){
-        somDoCheckPoint.play();
+         somDoCheckPoint.play();
       }
       //Game over e restart ficam invisíveis
       acabouSprite.visible = false;
@@ -106,7 +106,7 @@ function draw(){
       //Chama a função para criar os cactos
       criarCactos();
       //Aumenta a pontuação do jogador
-      pontos = pontos + Math.round(frameCount/60);
+      pontos = pontos + Math.round(frameRate()/60);
       //Verifica se o dinossauro bateu no cacto
       if(grupodecactos.isTouching(bowser)){
          //Muda o estado do jogo para GAMEOVER
@@ -132,6 +132,10 @@ function draw(){
       //Faz os grupos de cactos e nuvens não desaparecerem
       grupodenuvens.setLifetimeEach(-1);
       grupodecactos.setLifetimeEach(-1);
+      //Se o mouse aperta o botão de restart, o jogo recomeça
+      if(mousePressedOver(restartSprite)){
+         resetar();
+      }
    }
    //Faz o bowser não sair da tela
    bowser.collide(soloInvisivel);
@@ -140,29 +144,56 @@ function draw(){
    //Configura e coloca o texto dos pontos na tela
    fill("black");
    text("Pontuação: "+pontos,500,50);
-   
-
 }
 
+//Função responsável por resetar o jogo
+function resetar(){
+   //Volta o estado do jogo para o modo PLAY
+   estadodojogo = PLAY;
+   //Destrói as nuvens e os cactos
+   grupodenuvens.destroyEach();
+   grupodecactos.destroyEach();
+   //Muda a animação do Bowser para correndo novamente
+   bowser.changeAnimation("correndo", bowserCorrendo);
+   //Zera a pontuação
+   pontos = 0;
+}
+
+//Função responsável por criar as nuvens
 function criarNuvens(){
+   //Cria nuvens a cada 60 frames
    if(frameCount % 60 === 0){
+   //Cria o sprite da nuvem
    nuvem = createSprite(600,100,40,10);
+   //Adiciona a imagem de nuvem ao sprite criado
    nuvem.addImage(nuvemImagem);
+   //Faz as nuvens terem tamanhos aleatórios
    nuvem.scale = random(0.1, 1);
+   //Faz as nuvens terem posições aleatórios
    nuvem.y = Math.round(random(10,120));
+   //Faz as nuvens se moverem
    nuvem.velocityX = -3;
+   //Ajusta a profundidade das nuvens
    nuvem.depth = bowser.depth;
    bowser.depth = bowser.depth + 1;
+   //Define um tempo de vida máximo para a nuvem
    nuvem.lifetime = 200;
+   //Adiciona o sprite da nuvem ao grupo
    grupodenuvens.add(nuvem);
 }
 }
 
+//Função responsável por criar os cactos
 function criarCactos(){
+  //Faz os cactos surgirem a cada 60 frames
   if(frameCount % 60 === 0){
+     //Cria o sprite dos cactos (nome: bowsermau)
      var bowsermau = createSprite(600,165,10,40);
+     //Faz os cactos se moverem de acordo com os pontos
      bowsermau.velocityX = -(6+pontos/100);
+     //Cria um número aleatório arredondado entre 1 e 6
      var numero = Math.round(random(1,6));
+     //Muda a imagem do cacto de acordo com o número
      switch(numero){
         case 1: bowsermau.addImage(bowser1);
         break;
@@ -178,8 +209,11 @@ function criarCactos(){
         break;
         default: break;
      }
+     //Ajusta o tamanho do cacto
      bowsermau.scale= 0.5;
+     //Define o tempo de vida máximo para o cacto
      bowsermau.lifetime = 300;
+     //Adiciona o sprite do cacto ao grupo de cactos
      grupodecactos.add(bowsermau);
   }
 }
